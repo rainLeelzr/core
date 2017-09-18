@@ -62,7 +62,6 @@ public abstract class EntityCache<T extends BaseEntity> implements InitializingB
     @Override
     public void afterPropertiesSet() throws Exception {
         firstLoad();
-
     }
 
 }
