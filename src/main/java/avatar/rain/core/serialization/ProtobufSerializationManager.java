@@ -9,6 +9,10 @@ import java.util.Map;
 @Component
 public class ProtobufSerializationManager implements serialization {
 
+    /**
+     * key: protobuf的类名
+     * value: protobuf的parseFrom(byte[] data)方法
+     */
     private Map<String, Method> methods;
 
     public void init(Map<String, Method> methods) {
