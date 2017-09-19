@@ -2,7 +2,9 @@ package avatar.rain.core.api;
 
 import avatar.rain.core.net.atcp.request.RequestCmd;
 import avatar.rain.core.util.log.LogUtil;
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class ApiManager {
+public class ApiManager implements ApplicationContextAware {
 
     /**
      * key: cmd
@@ -27,7 +29,13 @@ public class ApiManager {
         return apis;
     }
 
-    public void init(ApplicationContext applicationContext) {
+    private ApplicationContext applicationContext;
+
+    /**
+     * 需要在所有spring bean加载完后，才调用本方法
+     */
+    public void init() {
+        LogUtil.getLogger().info("正在初始化ApiManager...");
         try {
             apis = new HashMap<>();
 
@@ -78,4 +86,8 @@ public class ApiManager {
 
     }
 
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
 }

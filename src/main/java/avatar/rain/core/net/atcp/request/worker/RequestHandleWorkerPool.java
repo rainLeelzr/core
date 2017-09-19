@@ -4,6 +4,7 @@ import avatar.rain.core.api.ApiManager;
 import avatar.rain.core.net.atcp.netpackage.BasePacket;
 import avatar.rain.core.net.atcp.request.ATCPRequest;
 import avatar.rain.core.serialization.ProtobufSerializationManager;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -13,7 +14,7 @@ import javax.annotation.Resource;
  * 分配式
  */
 @Component
-public class RequestHandleWorkerPool {
+public class RequestHandleWorkerPool implements InitializingBean {
 
     private int minWorkerCount = 5;//最少的工人队列
 
@@ -50,4 +51,8 @@ public class RequestHandleWorkerPool {
         worker.acceptRequest(event);
     }
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        initWorkers();
+    }
 }

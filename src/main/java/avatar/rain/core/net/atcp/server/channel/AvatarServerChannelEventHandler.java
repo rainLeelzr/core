@@ -69,8 +69,8 @@ public class AvatarServerChannelEventHandler extends BaseChannelEventHandler {
             IdleStateEvent event = (IdleStateEvent) evt;
             // todo 分发用户下线事件
             if (event.state() == IdleState.ALL_IDLE) {
-                LogUtil.getLogger().debug("tcp超时没有读写操作，将主动关闭链接通道！");
                 Session session = sessionManager.removeSession(ctx.channel());
+                LogUtil.getLogger().debug("tcp超时没有读写操作，将主动关闭链接通道！userId={}", session.getUserId());
                 ctx.channel().close();
             }
         }

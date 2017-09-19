@@ -182,8 +182,8 @@ public class RequestHandleWorker extends Thread {
     /**
      * 接收一个事件请求，放入队列中
      */
-    public final void acceptRequest(ATCPRequest event) {
-        boolean ok = this.blockingQueue.offer(event);
+    public final void acceptRequest(ATCPRequest request) {
+        boolean ok = this.blockingQueue.offer(request);
         if (!ok) {
             LogUtil.getLogger().error("添加请求到 请求队列 失败！");
         }
