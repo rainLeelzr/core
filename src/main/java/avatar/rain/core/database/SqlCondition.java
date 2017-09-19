@@ -1,6 +1,6 @@
 package avatar.rain.core.database;
 
-import avatar.rain.core.entity.BaseEntity;
+import avatar.rain.common.BaseEntity;
 
 import java.util.*;
 

@@ -1,6 +1,6 @@
 package avatar.rain.core.cache.memory;
 
-import avatar.rain.core.entity.BaseEntity;
+import avatar.rain.common.BaseEntity;
 import avatar.rain.core.util.log.LogUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.scheduling.annotation.Scheduled;
