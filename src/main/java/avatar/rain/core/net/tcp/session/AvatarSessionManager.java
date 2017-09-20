@@ -1,6 +1,9 @@
 package avatar.rain.core.net.tcp.session;
 
+import avatar.rain.core.net.tcp.TcpServerCondition;
 import io.netty.channel.Channel;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,6 +12,8 @@ import java.util.stream.Collectors;
 /**
  * 会话管理器，一个Channel对应一个session
  */
+@Configuration
+@Conditional(TcpServerCondition.class)
 public class AvatarSessionManager implements SessionManager<Channel> {
 
     private Map<Channel, Session> sessionMap = new ConcurrentHashMap<>();

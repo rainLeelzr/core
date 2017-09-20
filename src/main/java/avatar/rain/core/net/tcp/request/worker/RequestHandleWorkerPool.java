@@ -1,10 +1,13 @@
 package avatar.rain.core.net.tcp.request.worker;
 
 import avatar.rain.core.api.ApiManager;
+import avatar.rain.core.net.tcp.TcpServerCondition;
 import avatar.rain.core.net.tcp.netpackage.TcpPacket;
 import avatar.rain.core.net.tcp.request.ATCPRequest;
 import avatar.rain.core.serialization.ProtobufSerializationManager;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.Resource;
 
@@ -12,6 +15,8 @@ import javax.annotation.Resource;
  * 管理业务逻辑工人线程线程池
  * 分配式
  */
+@Configuration
+@Conditional(TcpServerCondition.class)
 public class RequestHandleWorkerPool implements InitializingBean {
 
     private int minWorkerCount = 5;//最少的工人队列

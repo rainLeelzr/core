@@ -1,6 +1,7 @@
 package avatar.rain.core.net.tcp.channel;
 
 
+import avatar.rain.core.net.tcp.TcpServerCondition;
 import avatar.rain.core.net.tcp.coder.AvatarDecoder;
 import avatar.rain.core.net.tcp.coder.AvatarEncoder;
 import avatar.rain.core.net.tcp.request.AvatarServerRequestManager;
@@ -9,6 +10,8 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
@@ -16,6 +19,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * 客户端成功connect后执行此类来初始化化此channel的行为
  */
+@Configuration
+@Conditional(TcpServerCondition.class)
 public class AvatarServerChannelInitializer extends ChannelInitializer<NioSocketChannel> {
 
     @Resource
