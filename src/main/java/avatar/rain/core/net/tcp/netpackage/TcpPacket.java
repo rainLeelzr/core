@@ -1,4 +1,4 @@
-package avatar.rain.core.net.atcp.netpackage;
+package avatar.rain.core.net.tcp.netpackage;
 
 import avatar.rain.core.util.log.LogUtil;
 import io.netty.buffer.ByteBuf;

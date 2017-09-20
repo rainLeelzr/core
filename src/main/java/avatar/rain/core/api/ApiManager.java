@@ -1,6 +1,6 @@
 package avatar.rain.core.api;
 
-import avatar.rain.core.net.atcp.request.RequestCmd;
+import avatar.rain.core.net.tcp.request.RequestCmd;
 import avatar.rain.core.util.log.LogUtil;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

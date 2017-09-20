@@ -1,6 +1,6 @@
-package avatar.rain.core.net.atcp.coder;
+package avatar.rain.core.net.tcp.coder;
 
-import avatar.rain.core.net.atcp.netpackage.TcpPacket;
+import avatar.rain.core.net.tcp.netpackage.TcpPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;

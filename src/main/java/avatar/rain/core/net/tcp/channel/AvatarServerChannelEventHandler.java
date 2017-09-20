@@ -1,12 +1,11 @@
-package avatar.rain.core.net.atcp.server.channel;
+package avatar.rain.core.net.tcp.channel;
 
-import avatar.rain.core.net.atcp.channel.BaseChannelEventHandler;
-import avatar.rain.core.net.atcp.netpackage.TcpPacket;
-import avatar.rain.core.net.atcp.request.ATCPRequest;
-import avatar.rain.core.net.atcp.server.request.AvatarServerRequestManager;
-import avatar.rain.core.net.atcp.session.ATCPPSession;
-import avatar.rain.core.net.atcp.session.AvatarSessionManager;
-import avatar.rain.core.net.atcp.session.Session;
+import avatar.rain.core.net.tcp.netpackage.TcpPacket;
+import avatar.rain.core.net.tcp.request.ATCPRequest;
+import avatar.rain.core.net.tcp.request.AvatarServerRequestManager;
+import avatar.rain.core.net.tcp.session.ATCPPSession;
+import avatar.rain.core.net.tcp.session.AvatarSessionManager;
+import avatar.rain.core.net.tcp.session.Session;
 import avatar.rain.core.util.log.LogUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;

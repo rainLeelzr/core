@@ -1,11 +1,10 @@
-package avatar.rain.core.net.atcp.request.worker;
+package avatar.rain.core.net.tcp.request.worker;
 
 import avatar.rain.core.api.ApiManager;
-import avatar.rain.core.net.atcp.netpackage.TcpPacket;
-import avatar.rain.core.net.atcp.request.ATCPRequest;
+import avatar.rain.core.net.tcp.netpackage.TcpPacket;
+import avatar.rain.core.net.tcp.request.ATCPRequest;
 import avatar.rain.core.serialization.ProtobufSerializationManager;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
@@ -13,7 +12,6 @@ import javax.annotation.Resource;
  * 管理业务逻辑工人线程线程池
  * 分配式
  */
-@Component
 public class RequestHandleWorkerPool implements InitializingBean {
 
     private int minWorkerCount = 5;//最少的工人队列

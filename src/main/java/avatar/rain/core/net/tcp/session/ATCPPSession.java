@@ -1,11 +1,11 @@
-package avatar.rain.core.net.atcp.session;
+package avatar.rain.core.net.tcp.session;
 
-import avatar.rain.core.net.atcp.netpackage.TcpPacket;
+import avatar.rain.core.net.tcp.netpackage.TcpPacket;
 import avatar.rain.core.util.log.LogUtil;
 import io.netty.channel.Channel;
 
 /**
- * atcp
+ * tcp
  */
 public class ATCPPSession extends Session<Channel> {
 

@@ -1,7 +1,7 @@
-package avatar.rain.core.net.atcp.request;
+package avatar.rain.core.net.tcp.request;
 
-import avatar.rain.core.net.atcp.netpackage.TcpPacket;
-import avatar.rain.core.net.atcp.session.Session;
+import avatar.rain.core.net.tcp.netpackage.TcpPacket;
+import avatar.rain.core.net.tcp.session.Session;
 import avatar.rain.core.util.log.LogUtil;
 
 /**

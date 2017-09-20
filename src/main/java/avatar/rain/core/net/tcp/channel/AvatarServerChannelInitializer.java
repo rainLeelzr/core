@@ -1,15 +1,14 @@
-package avatar.rain.core.net.atcp.server.channel;
+package avatar.rain.core.net.tcp.channel;
 
 
-import avatar.rain.core.net.atcp.coder.AvatarDecoder;
-import avatar.rain.core.net.atcp.coder.AvatarEncoder;
-import avatar.rain.core.net.atcp.server.request.AvatarServerRequestManager;
-import avatar.rain.core.net.atcp.session.AvatarSessionManager;
+import avatar.rain.core.net.tcp.coder.AvatarDecoder;
+import avatar.rain.core.net.tcp.coder.AvatarEncoder;
+import avatar.rain.core.net.tcp.request.AvatarServerRequestManager;
+import avatar.rain.core.net.tcp.session.AvatarSessionManager;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
@@ -17,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * 客户端成功connect后执行此类来初始化化此channel的行为
  */
-@Component
 public class AvatarServerChannelInitializer extends ChannelInitializer<NioSocketChannel> {
 
     @Resource

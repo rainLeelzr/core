@@ -1,6 +1,6 @@
-package avatar.rain.core.net.atcp.server;
+package avatar.rain.core.net.tcp;
 
-import avatar.rain.core.net.atcp.server.channel.AvatarServerChannelInitializer;
+import avatar.rain.core.net.tcp.channel.AvatarServerChannelInitializer;
 import avatar.rain.core.util.log.LogUtil;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -10,11 +10,9 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
-@Component
 public class TcpServer {
 
     @Resource

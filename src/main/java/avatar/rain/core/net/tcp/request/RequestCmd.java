@@ -1,4 +1,4 @@
-package avatar.rain.core.net.atcp.request;
+package avatar.rain.core.net.tcp.request;
 
 import org.springframework.core.annotation.AliasFor;
 

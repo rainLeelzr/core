@@ -1,4 +1,4 @@
-package avatar.rain.core.net.atcp.session;
+package avatar.rain.core.net.tcp.session;
 
 /**
  * session，Channel是代表一个具体的链接，例如在netty中，就代表是netty的channel

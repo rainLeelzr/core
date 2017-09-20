@@ -1,9 +1,9 @@
-package avatar.rain.core.net.atcp.request.worker;
+package avatar.rain.core.net.tcp.request.worker;
 
 import avatar.rain.core.api.Api;
 import avatar.rain.core.api.ApiManager;
-import avatar.rain.core.net.atcp.netpackage.TcpPacket;
-import avatar.rain.core.net.atcp.request.ATCPRequest;
+import avatar.rain.core.net.tcp.netpackage.TcpPacket;
+import avatar.rain.core.net.tcp.request.ATCPRequest;
 import avatar.rain.core.serialization.ProtobufSerializationManager;
 import avatar.rain.core.util.log.LogUtil;
 import com.alibaba.fastjson.JSON;
@@ -11,6 +11,7 @@ import com.google.protobuf.GeneratedMessage;
 import com.googlecode.protobuf.format.JsonFormat;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -79,7 +80,7 @@ public class RequestHandleWorker extends Thread {
         if (apiArgs == null) {
             return;
         }
-
+        LogUtil.getLogger().debug("解析body得到的请求参数：\n{}", Arrays.toString(apiArgs));
         long start = System.currentTimeMillis();
         try {
             api.getMethod().invoke(api.getBeanClass(), apiArgs);

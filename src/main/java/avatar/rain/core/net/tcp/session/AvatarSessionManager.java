@@ -1,7 +1,6 @@
-package avatar.rain.core.net.atcp.session;
+package avatar.rain.core.net.tcp.session;
 
 import io.netty.channel.Channel;
-import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,7 +9,6 @@ import java.util.stream.Collectors;
 /**
  * 会话管理器，一个Channel对应一个session
  */
-@Component
 public class AvatarSessionManager implements SessionManager<Channel> {
 
     private Map<Channel, Session> sessionMap = new ConcurrentHashMap<>();

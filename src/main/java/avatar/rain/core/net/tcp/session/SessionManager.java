@@ -1,4 +1,4 @@
-package avatar.rain.core.net.atcp.session;
+package avatar.rain.core.net.tcp.session;
 
 /**
  * 会话管理器
