@@ -2,8 +2,7 @@ package avatar.rain.core.net.atcp.request.worker;
 
 import avatar.rain.core.api.Api;
 import avatar.rain.core.api.ApiManager;
-import avatar.rain.core.net.atcp.netpackage.BasePacket;
-import avatar.rain.core.net.atcp.netpackage.PacketBodyType;
+import avatar.rain.core.net.atcp.netpackage.TcpPacket;
 import avatar.rain.core.net.atcp.request.ATCPRequest;
 import avatar.rain.core.serialization.ProtobufSerializationManager;
 import avatar.rain.core.util.log.LogUtil;
@@ -62,13 +61,13 @@ public class RequestHandleWorker extends Thread {
     }
 
     private void handle(ATCPRequest request) {
-        BasePacket packet = request.getPacket();
-        int cmd = packet.getCmd();
+        TcpPacket packet = request.getPacket();
+        String url = packet.getUrlStr();
 
-        Api api = apiManager.getApi(cmd);
+        Api api = apiManager.getApi(url);
         if (api == null) {
             LogUtil.getLogger().error(
-                    "客户端[{}]请求不存在cmd的api！请检查cmd是否正确。{}",
+                    "客户端[{}]请求不存在url的api！请检查url是否正确。{}",
                     request.getSession().getRemoteIP(),
                     request.getPacket().toString());
             // todo 发送消息给客户端
@@ -100,14 +99,14 @@ public class RequestHandleWorker extends Thread {
     /**
      * 将客户端传递过来的参数，封装成api需要的参数类型
      */
-    private Object[] parseApiParameters(BasePacket packet, Api api) {
+    private Object[] parseApiParameters(TcpPacket packet, Api api) {
         Object[] apiArgs = null;
 
         // 反序列化请求参数
-        int type = packet.getType();
-        if (type == PacketBodyType.Proto.getType()) {
+        byte bodyType = packet.getBodyType();
+        if (bodyType == TcpPacket.BodyType.PROTOBUF.geId()) {
             apiArgs = parseApiParametersFromProtobuf(packet, api);
-        } else if (type == PacketBodyType.Json.getType()) {
+        } else if (bodyType == TcpPacket.BodyType.JSON.geId()) {
             apiArgs = parseApiParametersFromJson(packet, api);
         } else {
             LogUtil.getLogger().error("不支持tcp头信息中的包类型为[{}]的值: {}", packet.toString());
@@ -119,10 +118,10 @@ public class RequestHandleWorker extends Thread {
     /**
      * 将json格式的二进制数据封装成api需要的参数类型
      */
-    private Object[] parseApiParametersFromJson(BasePacket packet, Api api) {
+    private Object[] parseApiParametersFromJson(TcpPacket packet, Api api) {
         String jsonStr;
         try {
-            jsonStr = new String(packet.getBytes(), "utf-8");
+            jsonStr = new String(packet.getBody(), "utf-8");
         } catch (UnsupportedEncodingException e) {
             LogUtil.getLogger().error(e.getMessage(), e);
             return null;
@@ -134,10 +133,10 @@ public class RequestHandleWorker extends Thread {
     /**
      * 将proto格式的二进制数据封装成api需要的参数类型
      */
-    private Object[] parseApiParametersFromProtobuf(BasePacket packet, Api api) {
+    private Object[] parseApiParametersFromProtobuf(TcpPacket packet, Api api) {
         GeneratedMessage protobufJavaBean;
         try {
-            protobufJavaBean = protobufSerializationManager.deserialize(api.getProtobuf(), packet.getBytes());
+            protobufJavaBean = protobufSerializationManager.deserialize(api.getProtobuf(), packet.getBody());
         } catch (Exception e) {
             LogUtil.getLogger().error(
                     "反序列化protobuf格式的request Body失败: {}",

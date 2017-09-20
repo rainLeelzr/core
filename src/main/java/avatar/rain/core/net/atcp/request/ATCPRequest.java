@@ -1,13 +1,13 @@
 package avatar.rain.core.net.atcp.request;
 
-import avatar.rain.core.net.atcp.netpackage.BasePacket;
+import avatar.rain.core.net.atcp.netpackage.TcpPacket;
 import avatar.rain.core.net.atcp.session.Session;
 import avatar.rain.core.util.log.LogUtil;
 
 /**
  * 一个网络包请求就是一个系统的事件.类似一个task任务
  */
-public class ATCPRequest<P extends BasePacket, S extends Session> {
+public class ATCPRequest<P extends TcpPacket, S extends Session> {
 
     private final P packet;
 

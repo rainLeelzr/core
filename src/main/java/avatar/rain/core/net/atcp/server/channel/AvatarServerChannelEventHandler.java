@@ -1,7 +1,7 @@
 package avatar.rain.core.net.atcp.server.channel;
 
 import avatar.rain.core.net.atcp.channel.BaseChannelEventHandler;
-import avatar.rain.core.net.atcp.netpackage.BasePacket;
+import avatar.rain.core.net.atcp.netpackage.TcpPacket;
 import avatar.rain.core.net.atcp.request.ATCPRequest;
 import avatar.rain.core.net.atcp.server.request.AvatarServerRequestManager;
 import avatar.rain.core.net.atcp.session.ATCPPSession;
@@ -37,7 +37,7 @@ public class AvatarServerChannelEventHandler extends BaseChannelEventHandler {
             return;
         }
 
-        session = new ATCPPSession(ctx);
+        session = new ATCPPSession(channel, sessionManager.getUseBodyType());
         sessionManager.addSession(ctx.channel(), session);
 
         LogUtil.getLogger().debug("服务器接收到客户端的连接，客户端ip：{}", channel.remoteAddress());
@@ -53,8 +53,8 @@ public class AvatarServerChannelEventHandler extends BaseChannelEventHandler {
             return;
         }
 
-        BasePacket packet = (BasePacket) object;
-        session.setUserId(packet.getUserId());
+        TcpPacket packet = (TcpPacket) object;
+        session.setUserId(packet.getUserIdStr());
 
         ATCPRequest bizRequest = new ATCPRequest(packet, session);
         requestManager.addRequest(bizRequest);
@@ -67,20 +67,27 @@ public class AvatarServerChannelEventHandler extends BaseChannelEventHandler {
         super.userEventTriggered(ctx, evt);
         if (IdleStateEvent.class.isAssignableFrom(evt.getClass())) {
             IdleStateEvent event = (IdleStateEvent) evt;
-            // todo 分发用户下线事件
             if (event.state() == IdleState.ALL_IDLE) {
-                Session session = sessionManager.removeSession(ctx.channel());
+                Session session = sessionManager.getSession(ctx.channel());
                 LogUtil.getLogger().debug("tcp超时没有读写操作，将主动关闭链接通道！userId={}", session.getUserId());
-                ctx.channel().close();
+                ctx.close();
             }
         }
     }
 
-
+    @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        Session session = sessionManager.removeSession(ctx.channel());
-        LogUtil.getLogger().debug("成功关闭了一个tcp连接：{}, userId={}", ctx.channel().remoteAddress(), session.getUserId());
+        Channel channel = ctx.channel();
+        if (channel != null) {
+            Session session = sessionManager.removeSession(ctx.channel());
+
+            LogUtil.getLogger().debug(
+                    "成功关闭了一个tcp连接：{}, userId={}",
+                    channel.remoteAddress(),
+                    session == null ? null : session.getUserId());
+        }
+
         // todo 分发用户下线事件
     }
 

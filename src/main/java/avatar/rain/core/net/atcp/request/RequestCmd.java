@@ -15,7 +15,7 @@ public @interface RequestCmd {
      * 协议号
      */
     @AliasFor("value")
-    int cmd() default 0;
+    String url();
 
     /**
      * 需要解析成的protobuf对应java对象的限定类名

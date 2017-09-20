@@ -3,11 +3,9 @@ package avatar.rain.core.net.atcp.session;
 import io.netty.channel.Channel;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * 会话管理器，一个Channel对应一个session
@@ -16,6 +14,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AvatarSessionManager implements SessionManager<Channel> {
 
     private Map<Channel, Session> sessionMap = new ConcurrentHashMap<>();
+
+    /**
+     * 发送给客户端时，默认使用的body数据表格
+     */
+    private String useBodyType = "protobuf";
 
     @Override
     public void addSession(Channel channel, Session session) {
@@ -32,7 +35,7 @@ public class AvatarSessionManager implements SessionManager<Channel> {
         return (T) sessionMap.get(channel);
     }
 
-    public Session getSessionByUserId(int userId) {
+    public Session getSessionByUserId(String userId) {
         Set<Channel> channels = sessionMap.keySet();
         if (channels.isEmpty()) {
             return null;
@@ -45,7 +48,7 @@ public class AvatarSessionManager implements SessionManager<Channel> {
         for (Channel channel : channels) {
             Session session = sessionMap.get(channel);
 
-            if (session.getUserId() != userId) {
+            if (!session.getUserId().equals(userId)) {
                 continue;
             }
 
@@ -70,25 +73,16 @@ public class AvatarSessionManager implements SessionManager<Channel> {
         return lastSession;
     }
 
-    public List<Session> getSessionsByUserIdList(List<Long> ids) {
-        if (ids == null || ids.size() == 0) {
-            return null;
+    public List<Session> getSessionsByUserIds(List<String> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Collections.emptyList();
         }
-        Set<Channel> sessions = sessionMap.keySet();
-        if (sessions == null || sessions.size() == 0) {
-            return null;
-        }
-        List<Session> ret = new ArrayList<>();
-        for (Long id : ids) {
-            for (Object o : sessions) {
-                Session s = sessionMap.get(o);
-                if (s.getUserId() == id) {
-                    ret.add(s);
-                    break;
-                }
-            }
-        }
-        return ret;
+
+        return sessionMap.entrySet()
+                .stream()
+                .filter(entry -> ids.contains(entry.getValue().getUserId()))
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toList());
     }
 
     //测试用
@@ -138,4 +132,7 @@ public class AvatarSessionManager implements SessionManager<Channel> {
         return sessionMap;
     }
 
+    public String getUseBodyType() {
+        return useBodyType;
+    }
 }

@@ -15,7 +15,7 @@ public abstract class Session<C> {
     /**
      * 业务系统的userId
      */
-    private int userId;
+    private String userId;
 
     private String remoteServerName;//远程服务器名
 
@@ -29,14 +29,12 @@ public abstract class Session<C> {
         createTime = System.currentTimeMillis();
     }
 
-    public void setUserId(int userId) {
-        if (userId > 0) {
-            this.userId = userId;
-        }
+    public String getUserId() {
+        return userId;
     }
 
-    public int getUserId() {
-        return userId;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public void setRemoteServerName(String serverName) {
@@ -72,7 +70,7 @@ public abstract class Session<C> {
         locked = false;
     }
 
-    public abstract void sendClient(int cmd, byte[] bytes);
+    public abstract void sendClient(String url, byte[] bodyBytes);
 
     public abstract String getRemoteIP();
 }

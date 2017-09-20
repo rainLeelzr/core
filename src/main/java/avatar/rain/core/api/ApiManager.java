@@ -16,16 +16,16 @@ import java.util.Map;
 public class ApiManager implements ApplicationContextAware {
 
     /**
-     * key: cmd
+     * key: url
      * value: Api
      */
-    private Map<Integer, Api> apis;
+    private Map<String, Api> apis;
 
-    public Api getApi(Integer cmd) {
-        return apis.get(cmd);
+    public Api getApi(String url) {
+        return apis.get(url);
     }
 
-    public Map<Integer, Api> getApis() {
+    public Map<String, Api> getApis() {
         return apis;
     }
 
@@ -53,17 +53,17 @@ public class ApiManager implements ApplicationContextAware {
                     }
 
                     // 解析此方法上的RequestCmd注解，判断其参数是否正确
-                    if (annotation.cmd() == 0) {
-                        throw new Error("方法[" + targetApiMethod.toString() + "]的RequestCmd注解参数错误，cmd必须赋值，且不能等于0");
+                    if (annotation.url() == null || annotation.url().length() == 0) {
+                        throw new Error("方法[" + targetApiMethod.toString() + "]的RequestCmd注解参数错误，url必须赋值，且不能为空字符串");
                     }
 
-                    if (apis.containsKey(annotation.cmd())) {
+                    if (apis.containsKey(annotation.url())) {
                         throw new Error("方法[" +
                                 targetApiMethod.toString() +
-                                "]的RequestCmd注解的cmd值与[" +
-                                apis.get(annotation.cmd()).getMethod().toString() +
-                                "]重复，请修改。cmd=" +
-                                annotation.cmd());
+                                "]的RequestCmd注解的url值与[" +
+                                apis.get(annotation.url()).getMethod().toString() +
+                                "]重复，请修改。url=" +
+                                annotation.url());
                     }
 
                     Class<?>[] parameterTypes = targetApiMethod.getParameterTypes();
@@ -76,7 +76,7 @@ public class ApiManager implements ApplicationContextAware {
                     api.setParameterNames(parameterNames);
                     api.setParameterTypes(parameterTypes);
 
-                    apis.put(annotation.cmd(), api);
+                    apis.put(annotation.url(), api);
                 }
             }
         } catch (Throwable e) {

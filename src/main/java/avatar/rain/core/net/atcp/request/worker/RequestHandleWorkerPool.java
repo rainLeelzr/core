@@ -1,7 +1,7 @@
 package avatar.rain.core.net.atcp.request.worker;
 
 import avatar.rain.core.api.ApiManager;
-import avatar.rain.core.net.atcp.netpackage.BasePacket;
+import avatar.rain.core.net.atcp.netpackage.TcpPacket;
 import avatar.rain.core.net.atcp.request.ATCPRequest;
 import avatar.rain.core.serialization.ProtobufSerializationManager;
 import org.springframework.beans.factory.InitializingBean;
@@ -32,8 +32,8 @@ public class RequestHandleWorkerPool implements InitializingBean {
      * 初始化工作线程
      */
     public void initWorkers() {
-        workers = new RequestHandleWorker[this.maxWorkerCount];
-        for (int i = 0; i < this.minWorkerCount; i++) {
+        workers = new RequestHandleWorker[this.minWorkerCount];
+        for (int i = 0; i < workers.length; i++) {
             RequestHandleWorker worker = new RequestHandleWorker(apiManager, protobufSerializationManager, "worker-" + i);
             workers[i] = worker;
             worker.start();
@@ -44,9 +44,9 @@ public class RequestHandleWorkerPool implements InitializingBean {
      * 将网络事件包分配到指定的
      */
     public void putRequestInQueue(ATCPRequest event) {
-        BasePacket packet = event.getPacket();
-        int code = packet.getCode();
-        int index = code % workers.length;
+        TcpPacket packet = event.getPacket();
+        byte[] code = packet.getUserId();
+        int index = code.length == 0 ? 0 : code[code.length - 1] % workers.length;
         RequestHandleWorker worker = workers[index];
         worker.acceptRequest(event);
     }
@@ -54,5 +54,10 @@ public class RequestHandleWorkerPool implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         initWorkers();
+    }
+
+    public static void main(String[] args) {
+        int i = 55 % 5;
+        System.out.println(i);
     }
 }

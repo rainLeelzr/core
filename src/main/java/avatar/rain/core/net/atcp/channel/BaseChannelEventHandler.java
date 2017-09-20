@@ -1,24 +1,15 @@
 package avatar.rain.core.net.atcp.channel;
 
-import avatar.rain.core.net.atcp.netpackage.ATCPPacket;
-import avatar.rain.core.net.atcp.netpackage.BasePacket;
 import avatar.rain.core.util.log.LogUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 public class BaseChannelEventHandler extends ChannelInboundHandlerAdapter {
-
-    @Override
-    public void channelRead(ChannelHandlerContext cx, Object object) {
-        ByteBuf byteBuf = (ByteBuf) object;
-
-        BasePacket packet = new ATCPPacket();
-        packet.parseFromFullATCPData(byteBuf);
-    }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
@@ -28,12 +19,12 @@ public class BaseChannelEventHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         if (!"远程主机强迫关闭了一个现有的连接。".equals(cause.getMessage())) {
-            if (!(cause instanceof NullPointerException)) {
-                LogUtil.getLogger().error(cause.getMessage(), cause);
-            }
+            LogUtil.getLogger().error(cause.getMessage(), cause);
         }
-        if (cause instanceof java.io.IOException)
+        if (cause instanceof IOException) {
             return;
+        }
+
         ctx.close();
     }
 
