@@ -80,7 +80,7 @@ public class RequestHandleWorker extends Thread {
         if (apiArgs == null) {
             return;
         }
-        LogUtil.getLogger().debug("解析body得到的请求参数：\n{}", Arrays.toString(apiArgs));
+        LogUtil.getLogger().debug("解析body得到的请求参数：{}", Arrays.toString(apiArgs));
         long start = System.currentTimeMillis();
         try {
             api.getMethod().invoke(api.getBeanClass(), apiArgs);
@@ -105,9 +105,9 @@ public class RequestHandleWorker extends Thread {
 
         // 反序列化请求参数
         byte bodyType = packet.getBodyType();
-        if (bodyType == TcpPacket.BodyType.PROTOBUF.geId()) {
+        if (bodyType == TcpPacket.BodyTypeEnum.PROTOBUF.geId()) {
             apiArgs = parseApiParametersFromProtobuf(packet, api);
-        } else if (bodyType == TcpPacket.BodyType.JSON.geId()) {
+        } else if (bodyType == TcpPacket.BodyTypeEnum.JSON.geId()) {
             apiArgs = parseApiParametersFromJson(packet, api);
         } else {
             LogUtil.getLogger().error("不支持tcp头信息中的包类型为[{}]的值: {}", packet.toString());
@@ -147,9 +147,9 @@ public class RequestHandleWorker extends Thread {
             return null;
         }
 
-        LogUtil.getLogger().debug("proto内容：\n{}", protobufJavaBean.toString());
+        LogUtil.getLogger().debug("proto内容：{}", protobufJavaBean.toString());
         String jsonStr = JsonFormat.printToString(protobufJavaBean);
-        LogUtil.getLogger().debug("proto转成json后的内容：\n{}", jsonStr);
+        LogUtil.getLogger().debug("proto转成json后的内容：{}", jsonStr);
 
         return parseJsonToParameters(api, jsonStr);
     }

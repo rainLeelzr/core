@@ -21,7 +21,7 @@ public class AvatarSessionManager implements SessionManager<Channel> {
     /**
      * 发送给客户端时，默认使用的body数据表格
      */
-    private String useBodyType = "protobuf";
+    private String bodyType = "protobuf";
 
     @Override
     public void addSession(Channel channel, Session session) {
@@ -135,7 +135,7 @@ public class AvatarSessionManager implements SessionManager<Channel> {
         return sessionMap;
     }
 
-    public String getUseBodyType() {
-        return useBodyType;
+    public String getBodyType() {
+        return bodyType;
     }
 }

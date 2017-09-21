@@ -2,7 +2,10 @@ package avatar.rain.core.serialization;
 
 import avatar.rain.core.api.Api;
 import avatar.rain.core.api.ApiManager;
+import avatar.rain.core.net.tcp.TcpServerCondition;
 import avatar.rain.core.util.log.LogUtil;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.Resource;
 import java.lang.reflect.InvocationTargetException;
@@ -11,6 +14,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+@Configuration
+@Conditional(TcpServerCondition.class)
 public class ProtobufSerializationManager implements serialization {
 
     /**

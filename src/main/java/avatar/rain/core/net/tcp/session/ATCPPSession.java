@@ -12,25 +12,25 @@ public class ATCPPSession extends Session<Channel> {
     /**
      * 发送给客户端时，默认使用的body数据表格
      */
-    private String useBodyType;
+    private String bodyType;
 
-    public ATCPPSession(Channel c, String useBodyType) {
+    public ATCPPSession(Channel c, String bodyType) {
         super(c);
-        this.useBodyType = useBodyType;
+        this.bodyType = bodyType;
     }
 
-    public void sendProtoToClient(String url, byte[] bodyBytes) {
-        TcpPacket packet = TcpPacket.buildProtoPackage(url, bodyBytes);
+    public void sendProtoToClient(TcpPacket.MethodEnum methodEnum, String url, byte[] bodyBytes) {
+        TcpPacket packet = TcpPacket.buildProtoPackage(methodEnum, url, bodyBytes);
         getChannel().writeAndFlush(packet.getByteBuf());
     }
 
-    public void sendJsonToClient(String url, byte[] bodyBytes) {
-        TcpPacket packet = TcpPacket.buildJsonPackage(url, bodyBytes);
+    public void sendJsonToClient(TcpPacket.MethodEnum methodEnum, String url, byte[] bodyBytes) {
+        TcpPacket packet = TcpPacket.buildJsonPackage(methodEnum, url, bodyBytes);
         getChannel().writeAndFlush(packet.getByteBuf());
     }
 
-    public void sendJsonToClient(String url, String bodyJson) {
-        TcpPacket packet = TcpPacket.buildJsonPackage(url, bodyJson);
+    public void sendJsonToClient(TcpPacket.MethodEnum methodEnum, String url, String bodyJson) {
+        TcpPacket packet = TcpPacket.buildJsonPackage(methodEnum, url, bodyJson);
         getChannel().writeAndFlush(packet.getByteBuf());
     }
 
@@ -38,17 +38,20 @@ public class ATCPPSession extends Session<Channel> {
         return getChannel().localAddress().toString();
     }
 
+    /**
+     * 默认使用TcpPacket.MethodEnum.GET 来发请求
+     */
     @Override
     public void sendClient(String url, byte[] bodyBytes) {
-        if (TcpPacket.BodyType.PROTOBUF.toString().equalsIgnoreCase(useBodyType)) {
-            sendProtoToClient(url, bodyBytes);
-        } else if (TcpPacket.BodyType.JSON.toString().equalsIgnoreCase(useBodyType)) {
-            sendJsonToClient(url, bodyBytes);
+        if (TcpPacket.BodyTypeEnum.PROTOBUF.toString().equalsIgnoreCase(bodyType)) {
+            sendProtoToClient(TcpPacket.MethodEnum.GET, url, bodyBytes);
+        } else if (TcpPacket.BodyTypeEnum.JSON.toString().equalsIgnoreCase(bodyType)) {
+            sendJsonToClient(TcpPacket.MethodEnum.GET, url, bodyBytes);
         } else {
-            TcpPacket.BodyType[] values = TcpPacket.BodyType.values();
+            TcpPacket.BodyTypeEnum[] values = TcpPacket.BodyTypeEnum.values();
             StringBuilder definedType = new StringBuilder();
             for (int i = 0; i < values.length; i++) {
-                TcpPacket.BodyType value = values[i];
+                TcpPacket.BodyTypeEnum value = values[i];
                 definedType.append(value.toString());
                 if (i < values.length - 1) {
                     definedType.append("、");
@@ -57,8 +60,8 @@ public class ATCPPSession extends Session<Channel> {
             LogUtil.getLogger().warn(
                     "useBodyType未初始化，或不是以下内容的其中一个：[{}]，将自动采用{}来编码",
                     definedType.toString(),
-                    TcpPacket.BodyType.PROTOBUF);
-            sendProtoToClient(url, bodyBytes);
+                    TcpPacket.BodyTypeEnum.PROTOBUF);
+            sendProtoToClient(TcpPacket.MethodEnum.GET, url, bodyBytes);
         }
     }
 

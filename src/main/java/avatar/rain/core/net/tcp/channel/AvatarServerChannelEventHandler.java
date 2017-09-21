@@ -36,7 +36,7 @@ public class AvatarServerChannelEventHandler extends BaseChannelEventHandler {
             return;
         }
 
-        session = new ATCPPSession(channel, sessionManager.getUseBodyType());
+        session = new ATCPPSession(channel, sessionManager.getBodyType());
         sessionManager.addSession(ctx.channel(), session);
 
         LogUtil.getLogger().debug("服务器接收到客户端的连接，客户端ip：{}", channel.remoteAddress());
@@ -53,7 +53,6 @@ public class AvatarServerChannelEventHandler extends BaseChannelEventHandler {
         }
 
         TcpPacket packet = (TcpPacket) object;
-        session.setUserId(packet.getUserIdStr());
 
         ATCPRequest bizRequest = new ATCPRequest(packet, session);
         requestManager.addRequest(bizRequest);

@@ -2,9 +2,9 @@ package avatar.rain.core.net.tcp.request.worker;
 
 import avatar.rain.core.api.ApiManager;
 import avatar.rain.core.net.tcp.TcpServerCondition;
-import avatar.rain.core.net.tcp.netpackage.TcpPacket;
 import avatar.rain.core.net.tcp.request.ATCPRequest;
 import avatar.rain.core.serialization.ProtobufSerializationManager;
+import org.apache.commons.lang3.RandomUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
@@ -46,12 +46,10 @@ public class RequestHandleWorkerPool implements InitializingBean {
     /**
      * 将网络事件包分配到指定的
      */
-    public void putRequestInQueue(ATCPRequest event) {
-        TcpPacket packet = event.getPacket();
-        byte[] code = packet.getUserId();
-        int index = code.length == 0 ? 0 : code[code.length - 1] % workers.length;
+    public void putRequestInQueue(ATCPRequest request) {
+        int index = RandomUtils.nextInt(0, workers.length);
         RequestHandleWorker worker = workers[index];
-        worker.acceptRequest(event);
+        worker.acceptRequest(request);
     }
 
     @Override
