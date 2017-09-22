@@ -1,6 +1,6 @@
 package avatar.rain.core.net.tcp.request.worker;
 
-import avatar.rain.core.api.ApiManager;
+import avatar.rain.core.api.MicroServerApi;
 import avatar.rain.core.net.tcp.TcpServerCondition;
 import avatar.rain.core.net.tcp.request.ATCPRequest;
 import avatar.rain.core.serialization.ProtobufSerializationManager;
@@ -8,6 +8,7 @@ import org.apache.commons.lang3.RandomUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Resource;
 
@@ -26,7 +27,10 @@ public class RequestHandleWorkerPool implements InitializingBean {
     private RequestHandleWorker[] workers;
 
     @Resource
-    private ApiManager apiManager;
+    private RestTemplate restTemplate;
+
+    @Resource
+    private MicroServerApi microServerApi;
 
     @Resource
     private ProtobufSerializationManager protobufSerializationManager;
@@ -37,7 +41,7 @@ public class RequestHandleWorkerPool implements InitializingBean {
     public void initWorkers() {
         workers = new RequestHandleWorker[this.minWorkerCount];
         for (int i = 0; i < workers.length; i++) {
-            RequestHandleWorker worker = new RequestHandleWorker(apiManager, protobufSerializationManager, "worker-" + i);
+            RequestHandleWorker worker = new RequestHandleWorker(restTemplate, microServerApi, protobufSerializationManager, "worker-" + i);
             workers[i] = worker;
             worker.start();
         }

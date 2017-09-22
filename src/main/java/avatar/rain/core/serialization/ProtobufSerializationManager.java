@@ -1,7 +1,7 @@
 package avatar.rain.core.serialization;
 
 import avatar.rain.core.api.Api;
-import avatar.rain.core.api.ApiManager;
+import avatar.rain.core.api.LocalApiManager;
 import avatar.rain.core.net.tcp.TcpServerCondition;
 import avatar.rain.core.util.log.LogUtil;
 import org.springframework.context.annotation.Conditional;
@@ -25,7 +25,7 @@ public class ProtobufSerializationManager implements serialization {
     private Map<String, Method> methods;
 
     @Resource
-    private ApiManager apiManager;
+    private LocalApiManager apiManager;
 
     /**
      * 需要在apiManager.init()之的，才执行。因为apiManager.init()未执行前，apiManager.getApis()为空
@@ -36,11 +36,11 @@ public class ProtobufSerializationManager implements serialization {
         Map<String, Method> methods = new HashMap<>();
 
         values.forEach(a -> {
-            if (!methods.containsKey(a.getProtobuf())) {
+            if (!methods.containsKey(a.getProtobufC2S())) {
                 try {
-                    Class<?> protoClass = Class.forName(a.getProtobuf());
+                    Class<?> protoClass = Class.forName(a.getProtobufC2S());
                     Method parseFrom = protoClass.getMethod("parseFrom", byte[].class);
-                    methods.put(a.getProtobuf(), parseFrom);
+                    methods.put(a.getProtobufC2S(), parseFrom);
                 } catch (ClassNotFoundException e) {
                     LogUtil.getLogger().error("找不到api定义的protobuf类：{}", a.toString());
                     System.exit(0);

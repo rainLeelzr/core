@@ -229,6 +229,10 @@ public class TcpPacket {
         return body;
     }
 
+    public byte getMethod() {
+        return method;
+    }
+
     /**
      * url的字符串形式
      */
