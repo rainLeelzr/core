@@ -25,7 +25,4 @@ public class ApiManagerApplicationListener implements ApplicationListener<Contex
         alreadyInitialized = true;
     }
 
-    public boolean isAlreadyInitialized() {
-        return alreadyInitialized;
-    }
 }

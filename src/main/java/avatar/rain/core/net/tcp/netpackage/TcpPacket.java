@@ -110,7 +110,9 @@ public class TcpPacket {
             DELETE方法所做的事情就是请服务器删除请求URL所指定的资源。
             但是客户端应用程序无法保证删除操作一定会执行。因为HTTP规范允许服务器在不通知客户端的情况下撤销请求。
         */
-        DELETE((byte) 7);
+        DELETE((byte) 7),
+
+        PATCH((byte) 8);
 
         private byte id;
 

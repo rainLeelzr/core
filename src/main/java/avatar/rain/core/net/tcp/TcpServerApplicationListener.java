@@ -1,6 +1,5 @@
 package avatar.rain.core.net.tcp;
 
-import avatar.rain.core.serialization.ProtobufSerializationManager;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
@@ -11,12 +10,6 @@ import javax.annotation.Resource;
 @Configuration
 @Conditional(TcpServerCondition.class)
 public class TcpServerApplicationListener implements ApplicationListener<ContextRefreshedEvent> {
-
-    // @Resource
-    // private ApiManager apiManager;
-
-    @Resource
-    private ProtobufSerializationManager protobufSerializationManager;
 
     @Resource
     private TcpServer tcpServer;
@@ -29,11 +22,6 @@ public class TcpServerApplicationListener implements ApplicationListener<Context
             return;
         }
 
-        // if (apiManager.getInitTime() == 0) {
-        //     apiManager.init();
-        // }
-
-        protobufSerializationManager.init();
         new Thread("netty-starter") {
 
             @Override
@@ -45,7 +33,4 @@ public class TcpServerApplicationListener implements ApplicationListener<Context
         alreadyInitialized = true;
     }
 
-    public boolean isAlreadyInitialized() {
-        return alreadyInitialized;
-    }
 }

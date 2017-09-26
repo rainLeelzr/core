@@ -1,6 +1,5 @@
 package avatar.rain.core.api;
 
-import avatar.rain.result.Result;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,9 +13,8 @@ public class ApiController {
     private LocalApiManager apiManager;
 
     @RequestMapping()
-    public Result getAllApis() {
-        Result result = new Result(1, "成功", apiManager.getApis());
-        return result;
+    public ServerApi getAllApis() {
+        return apiManager.getServerApi();
     }
 
     @RequestMapping("/initTime")

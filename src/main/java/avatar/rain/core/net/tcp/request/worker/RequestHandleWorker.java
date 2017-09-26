@@ -1,7 +1,7 @@
 package avatar.rain.core.net.tcp.request.worker;
 
 import avatar.rain.core.api.Api;
-import avatar.rain.core.api.MicroServerApi;
+import avatar.rain.core.api.MicroServerService;
 import avatar.rain.core.api.ServerApi;
 import avatar.rain.core.net.tcp.netpackage.TcpPacket;
 import avatar.rain.core.net.tcp.request.ATCPRequest;
@@ -12,9 +12,11 @@ import com.googlecode.protobuf.format.JsonFormat;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -32,17 +34,28 @@ public class RequestHandleWorker extends Thread {
 
     private long handledTimes = 0;//处理完的个数
 
-    private MicroServerApi microServerApi;
+    private MicroServerService microServerService;
 
     private ProtobufSerializationManager protobufSerializationManager;
 
     private RestTemplate restTemplate;
 
-    public RequestHandleWorker(RestTemplate restTemplate, MicroServerApi microServerApi, ProtobufSerializationManager protobufSerializationManager, String workName) {
+    /**
+     * key:   zuul配置的简化后的path
+     * value: serverName
+     */
+    private Map<String, String> serverNameMapping;
+
+    public RequestHandleWorker(RestTemplate restTemplate,
+                               MicroServerService microServerService,
+                               ProtobufSerializationManager protobufSerializationManager,
+                               Map<String, String> serverNameMapping,
+                               String workName) {
         super(workName);
         this.restTemplate = restTemplate;
-        this.microServerApi = microServerApi;
+        this.microServerService = microServerService;
         this.protobufSerializationManager = protobufSerializationManager;
+        this.serverNameMapping = serverNameMapping;
         this.blockingQueue = new ArrayBlockingQueue<>(maxQueueSize);
         this.setDaemon(true);
     }
@@ -85,18 +98,27 @@ public class RequestHandleWorker extends Thread {
             return;
         }
 
-        int second = url.indexOf("/", first);
+        int second = url.indexOf("/", first + 1);
         if (second < 0) {
             LogUtil.getLogger().debug("url错误，没有包含两个/，跳过请求的处理: {}", url);
             // todo 发送消息给客户端
             return;
         }
 
-        String serverName = url.substring(first, second);
+        String serverName = url.substring(first + 1, second);
+        String requestUrlWithoutServerName = url.substring(second);
 
         // 获取微服务的api
-        ServerApi microServer = microServerApi.getMicroServerByServerName(serverName);
-        if (microServer == null) {
+        ServerApi serverApi = microServerService.getMicroServerByServerName(serverName);
+        if (serverApi == null) {
+            String path = serverNameMapping.get(serverName);
+            if (path != null) {
+                url = path + requestUrlWithoutServerName;
+                serverApi = microServerService.getMicroServerByServerName(path.toUpperCase());
+            }
+        }
+
+        if (serverApi == null) {
             LogUtil.getLogger().error(
                     "客户端[{}]请求不存在microServer的api！请检查url是否正确。{}",
                     request.getSession().getRemoteIP(),
@@ -109,39 +131,66 @@ public class RequestHandleWorker extends Thread {
             /im/user/{id}/mm/{ij}
             /im/user/xxx-xxxx/mm/uu
          */
-        String requestUrlWithoutServerName = url.substring(second);
         String[] split = requestUrlWithoutServerName.split("/");
 
-        Map<ServerApi.UrlArray, Api> apis = microServer.getApis();
-        Api api = null;
+        // 成功匹配到的api
+        Api matchApi = null;
 
-        for (Map.Entry<ServerApi.UrlArray, Api> entry : apis.entrySet()) {
-            ServerApi.UrlArray urlArray = entry.getKey();
-            String[] urlArrays = urlArray.getUrlArray();
-            if (urlArrays.length != split.length) {
-                continue;
-            }
+        for (Map.Entry<String, List<Api>> entry : serverApi.getRequestMappingApis().entrySet()) {
+            List<Api> apisInUrl = entry.getValue();
 
-            boolean isMatch = true;
+            boolean isMatchUrl = false;
+            boolean isMatchMethod = false;
+            Api acceptAllMethodApi = null;
 
-            for (int i = 0; i < urlArrays.length; i++) {
-                String u = urlArrays[i];
+            for (Api tempApi : apisInUrl) {
+                String[] urlDivisions = tempApi.getUrlDivisions();
+                // 如果客户端请求的url和api的url在分割部分的数组长度不一致，则肯定不匹配
+                if (urlDivisions.length != split.length) {
+                    continue;
+                }
 
-                if (!u.startsWith("{") || !u.endsWith("}")) {
-                    String requestU = split[i];
-                    if (!u.equals(requestU)) {
-                        isMatch = false;
+                boolean isMatchUrlDivision = isMatchUrlDivision(split, urlDivisions);
+
+                // 如果url分段能匹配，则判断method是否匹配
+                if (isMatchUrlDivision) {
+                    isMatchUrl = true;
+
+                    // 判断并记录此api是否接受所有method
+                    if (tempApi.getRequestMethods().length == 0) {
+                        acceptAllMethodApi = tempApi;
+                    }
+
+                    // 判断输入的method是否存在于原始的可以接受的method中
+                    for (RequestMethod requestMethod : tempApi.getRequestMethods()) {
+                        if (isInputAndOriginalMethodEqual(requestMethod, packet.getMethod())) {
+                            isMatchMethod = true;
+                            break;
+                        }
+                    }
+
+                    // 如果method也匹配，则退出apisInUrl的循环
+                    if (isMatchMethod) {
+                        matchApi = tempApi;
                         break;
                     }
                 }
             }
 
-            if (isMatch) {
-                api = entry.getValue();
+            // 如果已经找到匹配的api，则退出serverApi循环
+            if (matchApi != null) {
+                break;
             }
+
+            // 如果已经匹配了url，则判断有没有接受所有method的api
+            if (isMatchUrl && acceptAllMethodApi != null) {
+                matchApi = acceptAllMethodApi;
+                break;
+            }
+
         }
 
-        if (api == null) {
+        if (matchApi == null) {
             LogUtil.getLogger().error(
                     "客户端[{}]请求不存在url的api！请检查url是否正确。{}",
                     request.getSession().getRemoteIP(),
@@ -151,7 +200,7 @@ public class RequestHandleWorker extends Thread {
         }
 
         // 将body参数转为json，从tcp包中的body部分获取解析而来
-        String json = parseApiParameters(packet, api);
+        String json = parseApiParameters(packet, matchApi);
         if (json == null) {
             LogUtil.getLogger().error(
                     "解析body参数，转换为json失败[{}]{}",
@@ -163,18 +212,17 @@ public class RequestHandleWorker extends Thread {
         LogUtil.getLogger().debug("解析body得到的请求参数：{}", json);
         long start = System.currentTimeMillis();
         try {
+            String requestUrl = "http://" + url;
             String restResult = "";
             if (packet.getMethod() == TcpPacket.MethodEnum.GET.geId()) {
-                restResult = restTemplate.getForObject(url, String.class);
+                restResult = restTemplate.getForObject(requestUrl, String.class);
             } else if (packet.getMethod() == TcpPacket.MethodEnum.POST.geId()) {
-
                 HttpHeaders headers = new HttpHeaders();
                 MediaType type = MediaType.parseMediaType("application/json; charset=UTF-8");
                 headers.setContentType(type);
                 headers.add("Accept", MediaType.APPLICATION_JSON.toString());
                 HttpEntity<String> formEntity = new HttpEntity<>(json, headers);
-
-                restResult = restTemplate.postForObject(url, formEntity, String.class);
+                restResult = restTemplate.postForObject(requestUrl, formEntity, String.class);
             }
             LogUtil.getLogger().debug("restTemplate执行结果：{}", restResult);
         } catch (Exception e) {
@@ -188,6 +236,31 @@ public class RequestHandleWorker extends Thread {
                     packet.toString(),
                     costTime);
         }
+    }
+
+    /**
+     * 判断输入的url分段和原始的url分段是否匹配
+     */
+    private boolean isMatchUrlDivision(String[] inputDivisions, String[] originalDivisions) {
+        boolean isMatchUrlDivision = true;
+
+        // 遍历分割的每个部分
+        for (int i = 0; i < originalDivisions.length; i++) {
+            String u = originalDivisions[i];
+
+            // 如果是占位符，则此段url视为正确匹配
+            if (u.startsWith("{") && u.endsWith("}")) {
+                continue;
+            }
+
+            // 如果不是占位符，则此段url必须要全部相同
+            String requestU = inputDivisions[i];
+            if (!u.equals(requestU)) {
+                isMatchUrlDivision = false;
+                break;
+            }
+        }
+        return isMatchUrlDivision;
     }
 
     /**
@@ -233,6 +306,12 @@ public class RequestHandleWorker extends Thread {
      * 将proto格式的二进制数据封装成api需要的参数类型
      */
     private String parseApiParametersFromProtobuf(TcpPacket packet, Api api) {
+        String protobufC2S = api.getProtobufC2S();
+        if (protobufC2S == null || protobufC2S.length() == 0) {
+            LogUtil.getLogger().debug("api中无c2s信息，无需转换proto");
+            return "";
+        }
+
         GeneratedMessage protobufJavaBean;
         try {
             protobufJavaBean = protobufSerializationManager.deserialize(api.getProtobufC2S(), packet.getBody());
@@ -272,6 +351,29 @@ public class RequestHandleWorker extends Thread {
 
     public boolean isRunning() {
         return this.running && this.isAlive();
+    }
+
+    private boolean isInputAndOriginalMethodEqual(RequestMethod requestMethod, byte method) {
+        switch (requestMethod) {
+            case GET:
+                return TcpPacket.MethodEnum.GET.geId() == method;
+            case HEAD:
+                return TcpPacket.MethodEnum.HEAD.geId() == method;
+            case POST:
+                return TcpPacket.MethodEnum.POST.geId() == method;
+            case PUT:
+                return TcpPacket.MethodEnum.PUT.geId() == method;
+            case PATCH:
+                return TcpPacket.MethodEnum.PATCH.geId() == method;
+            case DELETE:
+                return TcpPacket.MethodEnum.DELETE.geId() == method;
+            case OPTIONS:
+                return TcpPacket.MethodEnum.OPTIONS.geId() == method;
+            case TRACE:
+                return TcpPacket.MethodEnum.TRACE.geId() == method;
+            default:
+                return false;
+        }
     }
 
 }

@@ -1,16 +1,19 @@
 package avatar.rain.core.net.tcp.request.worker;
 
-import avatar.rain.core.api.MicroServerApi;
+import avatar.rain.core.api.MicroServerService;
 import avatar.rain.core.net.tcp.TcpServerCondition;
 import avatar.rain.core.net.tcp.request.ATCPRequest;
 import avatar.rain.core.serialization.ProtobufSerializationManager;
 import org.apache.commons.lang3.RandomUtils;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.cloud.netflix.zuul.filters.ZuulProperties;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 管理业务逻辑工人线程线程池
@@ -30,18 +33,30 @@ public class RequestHandleWorkerPool implements InitializingBean {
     private RestTemplate restTemplate;
 
     @Resource
-    private MicroServerApi microServerApi;
+    private MicroServerService microServerService;
 
     @Resource
     private ProtobufSerializationManager protobufSerializationManager;
+
+    @Resource
+    private ZuulProperties zuulProperties;
 
     /**
      * 初始化工作线程
      */
     public void initWorkers() {
         workers = new RequestHandleWorker[this.minWorkerCount];
+        Map<String, String> serverNameMapping = new HashMap<>();
+        for (Map.Entry<String, ZuulProperties.ZuulRoute> entry : zuulProperties.getRoutes().entrySet()) {
+            serverNameMapping.put(entry.getKey(), entry.getValue().getServiceId());
+        }
         for (int i = 0; i < workers.length; i++) {
-            RequestHandleWorker worker = new RequestHandleWorker(restTemplate, microServerApi, protobufSerializationManager, "worker-" + i);
+            RequestHandleWorker worker = new RequestHandleWorker(
+                    restTemplate,
+                    microServerService,
+                    protobufSerializationManager,
+                    serverNameMapping,
+                    "worker-" + i);
             workers[i] = worker;
             worker.start();
         }

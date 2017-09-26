@@ -1,23 +1,43 @@
 package avatar.rain.core.api;
 
+import java.util.List;
 import java.util.Map;
 
 public class ServerApi {
 
     /**
-     * 获取api的时间
+     * 初始化本微服务api的时间
      */
     private long time = 0;
 
-    private Map<String, Api> requestMappingApis;
+    /**
+     * key:   url
+     * value: api
+     */
+    private Map<String, List<Api>> requestMappingApis;
 
-    public ServerApi(long time, Map<String, Api> requestMappingApis) {
+    public ServerApi() {
+    }
+
+    public ServerApi(long time, Map<String, List<Api>> requestMappingApis) {
         this.time = time;
         this.requestMappingApis = requestMappingApis;
     }
 
     public long getTime() {
         return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    public Map<String, List<Api>> getRequestMappingApis() {
+        return requestMappingApis;
+    }
+
+    public void setRequestMappingApis(Map<String, List<Api>> requestMappingApis) {
+        this.requestMappingApis = requestMappingApis;
     }
 
     @Override
