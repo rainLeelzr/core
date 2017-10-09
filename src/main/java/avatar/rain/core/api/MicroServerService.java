@@ -2,13 +2,11 @@ package avatar.rain.core.api;
 
 import avatar.rain.core.util.log.LogUtil;
 import com.alibaba.fastjson.JSON;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.client.RestTemplate;
 
@@ -18,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MicroServerService implements InitializingBean, ApplicationContextAware {
+public class MicroServerService implements InitializingBean {
 
     @Resource
     private DiscoveryClient discoveryClient;
@@ -29,7 +27,8 @@ public class MicroServerService implements InitializingBean, ApplicationContextA
     @Value("${spring.application.name}")
     private String applicationName;
 
-    private ApplicationContext applicationContext;
+    @Resource
+    private ApplicationEventPublisher eventPublisher;
 
     /**
      * 各个微服务提供可以进行tcp访问的api集合
@@ -112,7 +111,7 @@ public class MicroServerService implements InitializingBean, ApplicationContextA
         if (updateCount > 0) {
             this.microServerApis = tempMicroServerApis;
             // 发出微服务已更新的时间
-            applicationContext.publishEvent(new MicroServerUpdatedEvent(microServerApis));
+            eventPublisher.publishEvent(new MicroServerUpdatedEvent(microServerApis));
         }
     }
 
@@ -121,8 +120,4 @@ public class MicroServerService implements InitializingBean, ApplicationContextA
         updateEurekaTcpServer();
     }
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-    }
 }

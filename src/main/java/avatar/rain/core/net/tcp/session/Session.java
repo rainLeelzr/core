@@ -1,5 +1,7 @@
 package avatar.rain.core.net.tcp.session;
 
+import avatar.rain.core.net.tcp.netpackage.TcpPacket;
+
 /**
  * session，Channel是代表一个具体的链接，例如在netty中，就代表是netty的channel
  */
@@ -72,5 +74,9 @@ public abstract class Session<C> {
 
     public abstract void sendClient(String url, byte[] bodyBytes);
 
+    public abstract void sendClient(TcpPacket tcpPacket);
+
     public abstract String getRemoteIP();
+
+
 }

@@ -70,6 +70,7 @@ public class TcpPacket {
      */
     private byte[] body;
 
+
     /**
      * tcp包的method的取值
      */
@@ -163,6 +164,10 @@ public class TcpPacket {
         return buildPackage(methodEnum, url, BodyTypeEnum.PROTOBUF, body);
     }
 
+    public static TcpPacket buildProtoPackage(byte method, String url, byte[] body) {
+        return buildPackage(method, url, BodyTypeEnum.PROTOBUF, body);
+    }
+
     /**
      * 构建body类型为Json格式的tcp包
      *
@@ -171,6 +176,10 @@ public class TcpPacket {
      */
     public static TcpPacket buildJsonPackage(MethodEnum methodEnum, String url, byte[] body) {
         return buildPackage(methodEnum, url, BodyTypeEnum.JSON, body);
+    }
+
+    public static TcpPacket buildJsonPackage(byte method, String url, byte[] body) {
+        return buildPackage(method, url, BodyTypeEnum.JSON, body);
     }
 
     /**
@@ -190,6 +199,18 @@ public class TcpPacket {
         return buildJsonPackage(methodEnum, url, bodyBytes);
     }
 
+    public static TcpPacket buildJsonPackage(byte method, String url, String body) {
+        byte[] bodyBytes;
+        try {
+            bodyBytes = body.getBytes(DEFAULT_CHARSET);
+        } catch (UnsupportedEncodingException e) {
+            LogUtil.getLogger().error(e.getMessage(), e);
+            bodyBytes = new byte[0];
+        }
+        return buildJsonPackage(method, url, bodyBytes);
+    }
+
+
     /**
      * 构建tcp包
      *
@@ -198,6 +219,10 @@ public class TcpPacket {
      * @param body         body数据
      */
     public static TcpPacket buildPackage(MethodEnum methodEnum, String url, BodyTypeEnum bodyTypeEnum, byte[] body) {
+        return buildPackage(methodEnum.id, url, bodyTypeEnum, body);
+    }
+
+    public static TcpPacket buildPackage(byte method, String url, BodyTypeEnum bodyTypeEnum, byte[] body) {
         byte[] urlBytes;
         try {
             urlBytes = url.getBytes(DEFAULT_CHARSET);
@@ -206,7 +231,7 @@ public class TcpPacket {
             urlBytes = new byte[0];
         }
         int length = MIN_LENGTH + urlBytes.length + body.length;
-        return new TcpPacket(length, methodEnum.id, urlBytes.length, urlBytes, bodyTypeEnum.id, body);
+        return new TcpPacket(length, method, urlBytes.length, urlBytes, bodyTypeEnum.id, body);
     }
 
     /**
@@ -255,6 +280,28 @@ public class TcpPacket {
         }
 
         return this.urlStr;
+    }
+
+    /**
+     * body的字符串形式
+     */
+    private String bodyStr;
+
+    public String getBodyStr() {
+        if (this.body == null) {
+            return null;
+        }
+
+        if (this.bodyStr == null) {
+            try {
+                bodyStr = new String(this.body, DEFAULT_CHARSET);
+            } catch (UnsupportedEncodingException e) {
+                LogUtil.getLogger().error(e.getMessage(), e);
+                bodyStr = "";
+            }
+        }
+
+        return this.bodyStr;
     }
 
     @Override

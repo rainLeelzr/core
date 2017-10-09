@@ -134,6 +134,7 @@ public class RequestHandleWorker extends Thread {
         String[] split = requestUrlWithoutServerName.split("/");
 
         // 成功匹配到的api
+        String matchUrl = "";
         Api matchApi = null;
 
         for (Map.Entry<String, List<Api>> entry : serverApi.getRequestMappingApis().entrySet()) {
@@ -172,6 +173,7 @@ public class RequestHandleWorker extends Thread {
                     // 如果method也匹配，则退出apisInUrl的循环
                     if (isMatchMethod) {
                         matchApi = tempApi;
+                        matchUrl = entry.getKey();
                         break;
                     }
                 }
@@ -185,6 +187,7 @@ public class RequestHandleWorker extends Thread {
             // 如果已经匹配了url，则判断有没有接受所有method的api
             if (isMatchUrl && acceptAllMethodApi != null) {
                 matchApi = acceptAllMethodApi;
+                matchUrl = entry.getKey();
                 break;
             }
 
@@ -225,6 +228,26 @@ public class RequestHandleWorker extends Thread {
                 restResult = restTemplate.postForObject(requestUrl, formEntity, String.class);
             }
             LogUtil.getLogger().debug("restTemplate执行结果：{}", restResult);
+
+            // 如果api的返回不为void，则自动封装数据返回给客户端
+            if (!matchApi.isVoid()) {
+                // 用什么body类型请求，则用什么类型返回
+                if (packet.getBodyType() == TcpPacket.BodyTypeEnum.PROTOBUF.geId()) {
+                    String protobufS2C = matchApi.getProtobufS2C();
+                    if (protobufS2C == null || protobufS2C.length() == 0) {
+                        LogUtil.getLogger().warn(
+                                "请求的body类型为pb，但返回的s2c没有定义，不能自动封装数据返回给客户端！{}",
+                                matchApi.getMethodName());
+                    } else {
+                        byte[] bytes = protobufSerializationManager.serialize(matchApi.getProtobufS2C(), restResult);
+                        TcpPacket responsePacket = TcpPacket.buildProtoPackage(packet.getMethod(), "/" + serverName + matchUrl, bytes);
+                        request.getSession().sendClient(responsePacket);
+                    }
+                } else if (packet.getBodyType() == TcpPacket.BodyTypeEnum.JSON.geId()) {
+                    TcpPacket responsePacket = TcpPacket.buildJsonPackage(packet.getMethod(), "/" + serverName + matchUrl, restResult);
+                    request.getSession().sendClient(responsePacket);
+                }
+            }
         } catch (Exception e) {
             LogUtil.getLogger().error("执行业务方法错误！{}", packet.toString(), e);
             // todo 发送消息给客户端

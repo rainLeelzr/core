@@ -84,10 +84,13 @@ public class LocalApiManager implements ApplicationContextAware {
 
                             Api api = new Api();
                             api.setMethodName(targetApiMethod.toString());
+
                             api.setRequestMethods(methodRequestMapping.method());
                             api.setProtobufC2S(protoAnnotation == null ? "" : protoAnnotation.c2s());
+                            api.setProtobufS2C(protoAnnotation == null ? "" : protoAnnotation.s2c());
                             api.setUrlDivisions(url.split("/"));
-
+                            Class<?> returnType = targetApiMethod.getReturnType();
+                            api.setReturnType(returnType.toString());
                             urlApis.add(api);
 
                             LogUtil.getLogger().debug("加载到{}", url);

@@ -10,6 +10,11 @@ public class Api {
     private String methodName;
 
     /**
+     * api方法的返回类型
+     */
+    private String returnType;
+
+    /**
      * 此方法接受的请求method
      */
     private RequestMethod[] requestMethods;
@@ -24,8 +29,17 @@ public class Api {
      */
     private String protobufC2S;
 
+    private String protobufS2C;
+
     public String getProtobufC2S() {
         return protobufC2S;
+    }
+
+    /**
+     * 判断是不是void返回值
+     */
+    public boolean isVoid() {
+        return "void".equals(this.returnType);
     }
 
     public void setProtobufC2S(String protobufC2S) {
@@ -54,5 +68,21 @@ public class Api {
 
     public void setRequestMethods(RequestMethod[] requestMethods) {
         this.requestMethods = requestMethods;
+    }
+
+    public String getProtobufS2C() {
+        return protobufS2C;
+    }
+
+    public void setProtobufS2C(String protobufS2C) {
+        this.protobufS2C = protobufS2C;
+    }
+
+    public String getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
     }
 }

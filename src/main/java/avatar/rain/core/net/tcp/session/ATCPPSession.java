@@ -3,6 +3,8 @@ package avatar.rain.core.net.tcp.session;
 import avatar.rain.core.net.tcp.netpackage.TcpPacket;
 import avatar.rain.core.util.log.LogUtil;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 
 /**
  * tcp
@@ -63,6 +65,13 @@ public class ATCPPSession extends Session<Channel> {
                     TcpPacket.BodyTypeEnum.PROTOBUF);
             sendProtoToClient(TcpPacket.MethodEnum.GET, url, bodyBytes);
         }
+    }
+
+    public void sendClient(TcpPacket packet) {
+        ChannelFuture channelFuture = getChannel().writeAndFlush(packet.getByteBuf());
+        channelFuture.addListener((ChannelFutureListener) future -> {
+            LogUtil.getLogger().debug("[发送给客户端成功]{}", packet.toString());
+        });
     }
 
     @Override
