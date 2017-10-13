@@ -241,11 +241,11 @@ public class RequestHandleWorker extends Thread {
                     } else {
                         byte[] bytes = protobufSerializationManager.serialize(matchApi.getProtobufS2C(), restResult);
                         TcpPacket responsePacket = TcpPacket.buildProtoPackage(packet.getMethod(), "/" + serverName + matchUrl, bytes);
-                        request.getSession().sendClient(responsePacket);
+                        request.getSession().sendMessage(responsePacket);
                     }
                 } else if (packet.getBodyType() == TcpPacket.BodyTypeEnum.JSON.geId()) {
                     TcpPacket responsePacket = TcpPacket.buildJsonPackage(packet.getMethod(), "/" + serverName + matchUrl, restResult);
-                    request.getSession().sendClient(responsePacket);
+                    request.getSession().sendMessage(responsePacket);
                 }
             }
         } catch (Exception e) {

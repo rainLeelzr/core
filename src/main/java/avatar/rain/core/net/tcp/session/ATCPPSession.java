@@ -44,7 +44,7 @@ public class ATCPPSession extends Session<Channel> {
      * 默认使用TcpPacket.MethodEnum.GET 来发请求
      */
     @Override
-    public void sendClient(String url, byte[] bodyBytes) {
+    public void sendMessage(String url, byte[] bodyBytes) {
         if (TcpPacket.BodyTypeEnum.PROTOBUF.toString().equalsIgnoreCase(bodyType)) {
             sendProtoToClient(TcpPacket.MethodEnum.GET, url, bodyBytes);
         } else if (TcpPacket.BodyTypeEnum.JSON.toString().equalsIgnoreCase(bodyType)) {
@@ -67,7 +67,7 @@ public class ATCPPSession extends Session<Channel> {
         }
     }
 
-    public void sendClient(TcpPacket packet) {
+    public void sendMessage(TcpPacket packet) {
         ChannelFuture channelFuture = getChannel().writeAndFlush(packet.getByteBuf());
         channelFuture.addListener((ChannelFutureListener) future -> {
             LogUtil.getLogger().debug("[发送给客户端成功]{}", packet.toString());

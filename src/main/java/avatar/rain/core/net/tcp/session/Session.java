@@ -72,9 +72,9 @@ public abstract class Session<C> {
         locked = false;
     }
 
-    public abstract void sendClient(String url, byte[] bodyBytes);
+    public abstract void sendMessage(String url, byte[] bodyBytes);
 
-    public abstract void sendClient(TcpPacket tcpPacket);
+    public abstract void sendMessage(TcpPacket tcpPacket);
 
     public abstract String getRemoteIP();
 
